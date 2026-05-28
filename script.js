@@ -147,9 +147,8 @@ function getRowsPerColumn() {
 
   const paperHeight = paperMode === "A3P" ? 420 : 297;
   const paperPaddingTopAndBottom = 16;
-  const titleHeight = 10;
   const safetyGap = 2;
-  const usableHeight = paperHeight - paperPaddingTopAndBottom - titleHeight - safetyGap;
+  const usableHeight = paperHeight - paperPaddingTopAndBottom - safetyGap;
 
   return Math.max(1, Math.floor(usableHeight / rowHeight));
 }
@@ -188,7 +187,6 @@ function buildPreview() {
   const columns = Number(document.getElementById("columnsInput").value) || 4;
   const rowsPerColumn = getRowsPerColumn();
   const pages = splitIntoPages(rows, columns, rowsPerColumn);
-  const title = document.getElementById("titleInput").value.trim();
 
   preview.className = "";
   preview.innerHTML = "";
@@ -196,10 +194,6 @@ function buildPreview() {
   pages.forEach(pageColumns => {
     const paper = document.createElement("div");
     paper.className = "paper";
-
-    const titleDiv = document.createElement("div");
-    titleDiv.className = "title";
-    titleDiv.textContent = title;
 
     const grid = document.createElement("div");
     grid.className = "grid";
@@ -229,7 +223,7 @@ function buildPreview() {
       grid.appendChild(table);
     });
 
-    paper.append(titleDiv, grid);
+    paper.appendChild(grid);
     preview.appendChild(paper);
   });
 
@@ -326,6 +320,6 @@ document.getElementById("sampleBtn").addEventListener("click", () => {
   buildPreview();
 });
 
-["titleInput", "columnsInput", "fontInput", "rowHeightInput", "paperSelect"].forEach(id => {
+["columnsInput", "fontInput", "rowHeightInput", "paperSelect"].forEach(id => {
   document.getElementById(id).addEventListener("input", buildPreview);
 });

@@ -5,7 +5,6 @@
   --border: #111;
   --highlight: #fff200;
   --paper-padding: 8mm;
-  --title-height: 10mm;
 }
 
 * { box-sizing: border-box; }
@@ -32,7 +31,7 @@ h1 { margin: 0 0 8px; font-size: 28px; }
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -83,15 +82,6 @@ button.secondary { background: #e5e7eb; color: #111827; }
 
 .paper:last-child { page-break-after: auto; }
 
-.title {
-  text-align: center;
-  font-weight: 900;
-  font-size: 18pt;
-  height: var(--title-height);
-  line-height: var(--title-height);
-  letter-spacing: 0.08em;
-}
-
 .grid { display: grid; gap: var(--gap); align-items: start; }
 
 .nameTable {
@@ -129,12 +119,39 @@ button.secondary { background: #e5e7eb; color: #111827; }
   border-radius: 14px;
 }
 
-@page { size: A3 landscape; margin: 6mm; }
+@page {
+  size: A3 landscape;
+  margin: 6mm;
+}
 
 @media print {
-  body { background: white; }
+  html, body {
+    width: 420mm;
+    min-height: 297mm;
+    background: white;
+  }
+
   .app { max-width: none; padding: 0; }
   .panel { display: none; }
-  .previewWrap { padding: 0; margin: 0; background: white; box-shadow: none; border-radius: 0; overflow: visible; }
-  .paper { width: auto; height: auto; margin: 0; padding: 0; box-shadow: none; overflow: hidden; }
+
+  .previewWrap {
+    padding: 0;
+    margin: 0;
+    background: white;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .paper {
+    width: 408mm;
+    height: 285mm;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  .paper:last-child { page-break-after: auto; }
 }
