@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A3 Name List Printer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>A3 Name List Printer</h1>
+      <p class="hint">
+        Paste directly from Excel. The tool spreads the names across the whole A3 page in table columns.
+        It keeps the original number and name exactly as pasted, and only uses deceased detection for highlighting.
+      </p>
+
+      <div class="controls">
+        <div>
+          <label for="titleInput">Print title</label>
+          <input id="titleInput" value="植福弟子" />
+        </div>
+        <div>
+          <label for="columnsInput">Columns</label>
+          <input id="columnsInput" type="number" min="2" max="8" value="4" />
+        </div>
+        <div>
+          <label for="fontInput">Font size</label>
+          <input id="fontInput" type="number" min="5" max="14" step="0.5" value="8" />
+        </div>
+        <div>
+          <label for="rowHeightInput">Row height mm</label>
+          <input id="rowHeightInput" type="number" min="3" max="9" step="0.1" value="5.1" />
+        </div>
+        <div>
+          <label for="paperSelect">Paper</label>
+          <select id="paperSelect">
+            <option value="A3L" selected>A3 landscape</option>
+            <option value="A3P">A3 portrait</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="buildBtn">Build Preview</button>
+        <button id="printBtn">Print A3</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+        <button id="sampleBtn" class="secondary">Load Sample</button>
+        <button id="fitBtn" class="secondary">Auto Fit</button>
+      </div>
+
+      <label for="pasteBox">Paste Excel no and name here</label>
+      <div id="pasteBox" class="pasteBox" contenteditable="true" aria-label="Paste Excel rows here"></div>
+      <div id="status" class="status">No rows loaded yet.</div>
+    </section>
+
+    <section class="previewWrap">
+      <div id="paper" class="paper">
+        <div id="printTitle" class="title">植福弟子</div>
+        <div id="preview" class="emptyHint">Paste your Excel list, then click Build Preview.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
