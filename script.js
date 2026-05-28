@@ -1,14 +1,11 @@
 const pasteBox = document.getElementById("pasteBox");
 const preview = document.getElementById("preview");
 const statusEl = document.getElementById("status");
-const printTitle = document.getElementById("printTitle");
 
 let rows = [];
 
 function normaliseText(value) {
-  return String(value || "")
-    .replaceAll("\u00a0", " ")
-    .trim();
+  return String(value || "").replaceAll("\u00a0", " ").trim();
 }
 
 function colourLooksHighlighted(styleText) {
@@ -24,9 +21,7 @@ function colourLooksHighlighted(styleText) {
 
 function elementIsHighlighted(element) {
   if (!element || element.nodeType !== 1) return false;
-
   if (colourLooksHighlighted(element.getAttribute("style"))) return true;
-
   const bgcolor = String(element.getAttribute("bgcolor") || "").toLowerCase();
   return ["yellow", "#ffff00", "#fff200", "ffff00"].includes(bgcolor);
 }
@@ -61,12 +56,13 @@ function isDeceasedEntry(name) {
 function prepareRow(no, name, excelHighlighted = false) {
   const exactNo = String(no || "").trim();
   const exactName = String(name || "").trim();
+  const deceased = isDeceasedEntry(exactName);
 
   return {
     no: exactNo,
     name: exactName,
-    deceased: isDeceasedEntry(exactName),
-    highlight: excelHighlighted || isDeceasedEntry(exactName)
+    deceased,
+    highlight: excelHighlighted || deceased
   };
 }
 
@@ -145,12 +141,37 @@ function readRowsFromPasteBoxIfNeeded() {
   rows = parsePlainText(pasteBox.innerText);
 }
 
-function chunkRows(items, columns) {
-  const perColumn = Math.ceil(items.length / columns);
-  return Array.from({ length: columns }, (_, index) => {
-    const start = index * perColumn;
-    return items.slice(start, start + perColumn);
-  });
+function getRowsPerColumn() {
+  const paperMode = document.getElementById("paperSelect").value;
+  const rowHeight = Number(document.getElementById("rowHeightInput").value) || 5.1;
+
+  const paperHeight = paperMode === "A3P" ? 420 : 297;
+  const paperPaddingTopAndBottom = 16;
+  const titleHeight = 10;
+  const safetyGap = 2;
+  const usableHeight = paperHeight - paperPaddingTopAndBottom - titleHeight - safetyGap;
+
+  return Math.max(1, Math.floor(usableHeight / rowHeight));
+}
+
+function splitIntoPages(items, columns, rowsPerColumn) {
+  const rowsPerPage = columns * rowsPerColumn;
+  const pages = [];
+
+  for (let pageStart = 0; pageStart < items.length; pageStart += rowsPerPage) {
+    const pageRows = items.slice(pageStart, pageStart + rowsPerPage);
+    const pageColumns = [];
+
+    for (let col = 0; col < columns; col++) {
+      const start = col * rowsPerColumn;
+      const end = start + rowsPerColumn;
+      pageColumns.push(pageRows.slice(start, end));
+    }
+
+    pages.push(pageColumns);
+  }
+
+  return pages;
 }
 
 function buildPreview() {
@@ -165,46 +186,61 @@ function buildPreview() {
   }
 
   const columns = Number(document.getElementById("columnsInput").value) || 4;
-  const groups = chunkRows(rows, columns);
+  const rowsPerColumn = getRowsPerColumn();
+  const pages = splitIntoPages(rows, columns, rowsPerColumn);
+  const title = document.getElementById("titleInput").value.trim();
 
-  preview.className = "grid";
-  preview.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+  preview.className = "";
   preview.innerHTML = "";
 
-  groups.forEach(group => {
-    const table = document.createElement("table");
-    table.className = "nameTable";
-    const tbody = document.createElement("tbody");
+  pages.forEach(pageColumns => {
+    const paper = document.createElement("div");
+    paper.className = "paper";
 
-    group.forEach(row => {
-      const tr = document.createElement("tr");
-      if (row.highlight) tr.classList.add("highlight");
+    const titleDiv = document.createElement("div");
+    titleDiv.className = "title";
+    titleDiv.textContent = title;
 
-      const tdNo = document.createElement("td");
-      tdNo.className = "num";
-      tdNo.textContent = row.no;
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
 
-      const tdName = document.createElement("td");
-      tdName.textContent = row.name;
+    pageColumns.forEach(columnRows => {
+      const table = document.createElement("table");
+      table.className = "nameTable";
+      const tbody = document.createElement("tbody");
 
-      tr.append(tdNo, tdName);
-      tbody.appendChild(tr);
+      columnRows.forEach(row => {
+        const tr = document.createElement("tr");
+        if (row.highlight) tr.classList.add("highlight");
+
+        const tdNo = document.createElement("td");
+        tdNo.className = "num";
+        tdNo.textContent = row.no;
+
+        const tdName = document.createElement("td");
+        tdName.textContent = row.name;
+
+        tr.append(tdNo, tdName);
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      grid.appendChild(table);
     });
 
-    table.appendChild(tbody);
-    preview.appendChild(table);
+    paper.append(titleDiv, grid);
+    preview.appendChild(paper);
   });
 
-  updateStatus();
+  updateStatus(rowsPerColumn, pages.length);
 }
 
 function applySettings() {
-  const title = document.getElementById("titleInput").value.trim();
   const fontSize = Number(document.getElementById("fontInput").value) || 8;
   const rowHeight = Number(document.getElementById("rowHeightInput").value) || 5.1;
   const paperMode = document.getElementById("paperSelect").value;
 
-  printTitle.textContent = title;
   document.documentElement.style.setProperty("--print-font-size", `${fontSize}pt`);
   document.documentElement.style.setProperty("--row-height", `${rowHeight}mm`);
 
@@ -250,14 +286,16 @@ function autoFit() {
   buildPreview();
 }
 
-function updateStatus() {
+function updateStatus(rowsPerColumn = getRowsPerColumn(), pageCount = 0) {
   const highlighted = rows.filter(row => row.highlight).length;
   const deceased = rows.filter(row => row.deceased).length;
-  statusEl.textContent = `${rows.length} rows loaded. ${highlighted} highlighted rows detected. ${deceased} deceased or special dedication rows auto highlighted.`;
+  const columns = Number(document.getElementById("columnsInput").value) || 4;
+  const rowsPerPage = rowsPerColumn * columns;
+
+  statusEl.textContent = `${rows.length} rows loaded. ${highlighted} highlighted rows detected. ${deceased} deceased or special dedication rows auto highlighted. ${rowsPerColumn} rows per column, ${rowsPerPage} rows per page, ${pageCount || Math.ceil(rows.length / rowsPerPage)} page(s).`;
 }
 
 document.getElementById("buildBtn").addEventListener("click", buildPreview);
-
 document.getElementById("fitBtn").addEventListener("click", autoFit);
 
 document.getElementById("printBtn").addEventListener("click", () => {
@@ -272,15 +310,13 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 });
 
 document.getElementById("sampleBtn").addEventListener("click", () => {
-  rows = [
-    prepareRow("M0001", "何呂艾璇"),
-    prepareRow("M0002", "SMJ地毯私人有限公司"),
-    prepareRow("M0022", "十方法界一切众生"),
-    prepareRow("M0023", "蔡门冤亲债主"),
-    prepareRow("M0031", "故 郑碧英 @花"),
-    prepareRow("M0040", "故 Chew Soh Choo"),
-    prepareRow("M0085", "Mr And Mrs Yeo Eng Teck")
-  ];
+  rows = [];
+
+  for (let i = 1; i <= 460; i++) {
+    const no = "M" + String(i).padStart(4, "0");
+    const name = i % 30 === 0 ? `故 Sample Name ${i}` : `Sample Name ${i}`;
+    rows.push(prepareRow(no, name));
+  }
 
   pasteBox.innerHTML = rows.map(row => {
     const style = row.highlight ? " style='background:#fff200;color:#d71920;font-weight:800;'" : "";

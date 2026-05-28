@@ -4,11 +4,11 @@
   --gap: 4mm;
   --border: #111;
   --highlight: #fff200;
+  --paper-padding: 8mm;
+  --title-height: 10mm;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -17,11 +17,7 @@ body {
   color: #111827;
 }
 
-.app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
+.app { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
 .panel {
   background: white;
@@ -31,16 +27,8 @@ body {
   margin-bottom: 20px;
 }
 
-h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
-}
-
-.hint {
-  margin: 0 0 16px;
-  color: #4b5563;
-  line-height: 1.5;
-}
+h1 { margin: 0 0 8px; font-size: 28px; }
+.hint { margin: 0 0 16px; color: #4b5563; line-height: 1.5; }
 
 .controls {
   display: grid;
@@ -49,12 +37,7 @@ h1 {
   margin-bottom: 16px;
 }
 
-label {
-  display: block;
-  font-weight: 700;
-  font-size: 13px;
-  margin-bottom: 6px;
-}
+label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; }
 
 input, select, button {
   width: 100%;
@@ -65,18 +48,8 @@ input, select, button {
   background: white;
 }
 
-button {
-  cursor: pointer;
-  border: 0;
-  font-weight: 800;
-  background: #111827;
-  color: white;
-}
-
-button.secondary {
-  background: #e5e7eb;
-  color: #111827;
-}
+button { cursor: pointer; border: 0; font-weight: 800; background: #111827; color: white; }
+button.secondary { background: #e5e7eb; color: #111827; }
 
 .pasteBox {
   min-height: 160px;
@@ -88,16 +61,7 @@ button.secondary {
   line-height: 1.45;
 }
 
-.pasteBox:focus {
-  outline: 3px solid rgba(17, 24, 39, 0.18);
-  border-color: #111827;
-}
-
-.status {
-  margin-top: 10px;
-  font-weight: 700;
-  color: #374151;
-}
+.status { margin-top: 10px; font-weight: 700; color: #374151; }
 
 .previewWrap {
   overflow: auto;
@@ -108,26 +72,27 @@ button.secondary {
 
 .paper {
   width: var(--paper-width);
-  min-height: var(--paper-height);
-  margin: 0 auto;
-  padding: 8mm;
+  height: var(--paper-height);
+  margin: 0 auto 16px auto;
+  padding: var(--paper-padding);
   background: white;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  page-break-after: always;
+  overflow: hidden;
 }
+
+.paper:last-child { page-break-after: auto; }
 
 .title {
   text-align: center;
   font-weight: 900;
   font-size: 18pt;
-  margin-bottom: 4mm;
+  height: var(--title-height);
+  line-height: var(--title-height);
   letter-spacing: 0.08em;
 }
 
-.grid {
-  display: grid;
-  gap: var(--gap);
-  align-items: start;
-}
+.grid { display: grid; gap: var(--gap); align-items: start; }
 
 .nameTable {
   width: 100%;
@@ -148,10 +113,7 @@ button.secondary {
   text-overflow: ellipsis;
 }
 
-.nameTable td.num {
-  width: 15mm;
-  font-weight: 800;
-}
+.nameTable td.num { width: 15mm; font-weight: 800; }
 
 .nameTable tr.highlight td {
   background: var(--highlight) !important;
@@ -167,43 +129,12 @@ button.secondary {
   border-radius: 14px;
 }
 
-@page {
-  size: A3 landscape;
-  margin: 6mm;
-}
+@page { size: A3 landscape; margin: 6mm; }
 
 @media print {
-  body {
-    background: white;
-  }
-
-  .app > .panel,
-  .previewWrap {
-    padding: 0;
-    margin: 0;
-    background: white;
-    box-shadow: none;
-    border-radius: 0;
-  }
-
-  .app {
-    max-width: none;
-    padding: 0;
-  }
-
-  .app > .panel:first-child {
-    display: none;
-  }
-
-  .paper {
-    width: auto;
-    min-height: auto;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-  }
-
-  .grid {
-    gap: var(--gap);
-  }
+  body { background: white; }
+  .app { max-width: none; padding: 0; }
+  .panel { display: none; }
+  .previewWrap { padding: 0; margin: 0; background: white; box-shadow: none; border-radius: 0; overflow: visible; }
+  .paper { width: auto; height: auto; margin: 0; padding: 0; box-shadow: none; overflow: hidden; }
 }
