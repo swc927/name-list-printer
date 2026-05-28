@@ -147,10 +147,12 @@ function getRowsPerColumn() {
 
   const paperHeight = paperMode === "A3P" ? 420 : 297;
   const paperPaddingTopAndBottom = 16;
-  const safetyGap = 2;
-  const usableHeight = paperHeight - paperPaddingTopAndBottom - safetyGap;
+  const browserPrintReserve = 18;
+  const usableHeight = paperHeight - paperPaddingTopAndBottom - browserPrintReserve;
 
-  return Math.max(1, Math.floor(usableHeight / rowHeight));
+  const safeRows = Math.floor(usableHeight / rowHeight);
+
+  return Math.max(1, safeRows);
 }
 
 function splitIntoPages(items, columns, rowsPerColumn) {
